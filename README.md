@@ -69,6 +69,58 @@ Traffic Classification
 python train_cnn.py -d train_test_data/traffic_classification/train.parquet -m model/traffic_classification.cnn.model -t traffic
 ```
 
+## Test Model
+
+Application Classification
+
+```bash
+python test_cnn.py -d train_test_data/application_classification/test.parquet -m model/application_classification.cnn.model -t app
+```
+
+Results using the pre-processed dataset at [here](https://drive.google.com/file/d/1EF2MYyxMOWppCUXlte8lopkytMyiuQu_/view?usp=sharing)
+
+|    | label        |   recall |   precision |   f1-score |
+|---:|:-------------|---------:|------------:|-----------:|
+|  0 | AIM Chat     | 0.64411  |   0.0436111 |  0.081691  |
+|  1 | Email        | 0.925285 |   0.059836  |  0.112403  |
+|  2 | Facebook     | 0.841968 |   0.901054  |  0.87051   |
+|  3 | FTPS         | 0.995801 |   0.999087  |  0.997441  |
+|  4 | Gmail        | 0.909599 |   0.15964   |  0.271611  |
+|  5 | Hangouts     | 0.881471 |   0.994193  |  0.934445  |
+|  6 | ICQ          | 0.776256 |   0.0234494 |  0.0455235 |
+|  7 | Netflix      | 0.988249 |   0.972343  |  0.980232  |
+|  8 | SCP          | 0.916408 |   0.911979  |  0.914188  |
+|  9 | SFTP         | 0.994359 |   0.977474  |  0.985844  |
+| 10 | Skype        | 0.81999  |   0.97762   |  0.891894  |
+| 11 | Spotify      | 0.936082 |   0.368928  |  0.529263  |
+| 12 | Vimeo        | 0.981894 |   0.963267  |  0.972491  |
+| 13 | Voipbuster   | 0.977807 |   0.992433  |  0.985066  |
+| 14 | Youtube      | 0.976249 |   0.934379  |  0.954855  |
+| 15 | Wtd. Average | 0.901613 |   0.967639  |  0.930125  |
+
+Traffic Classification
+
+```bash
+python test_cnn.py -d train_test_data/traffic_classification/test.parquet -m model/traffic_classification.cnn.model -t traffic
+```
+
+Results using the pre-processed dataset at [here](https://drive.google.com/file/d/1EF2MYyxMOWppCUXlte8lopkytMyiuQu_/view?usp=sharing)
+
+|    | label              |   recall |   precision |   f1-score |
+|---:|:-------------------|---------:|------------:|-----------:|
+|  0 | Chat               | 0.751276 |   0.261179  |   0.387607 |
+|  1 | Email              | 0.809323 |   0.0725722 |   0.1332   |
+|  2 | File Transfer      | 0.948507 |   0.998027  |   0.972637 |
+|  3 | Streaming          | 0.984182 |   0.968708  |   0.976384 |
+|  4 | Voip               | 0.916154 |   0.988083  |   0.95076  |
+|  5 | VPN: Chat          | 0.991419 |   0.422251  |   0.592257 |
+|  6 | VPN: File Transfer | 0.983454 |   0.938055  |   0.960218 |
+|  7 | VPN: Email         | 0.995621 |   0.840729  |   0.911643 |
+|  8 | VPN: Streaming     | 0.994786 |   0.997522  |   0.996152 |
+|  9 | VPN: Torrent       | 0.998551 |   0.990618  |   0.994568 |
+| 10 | VPN: Voip          | 0.982553 |   0.983955  |   0.983254 |
+| 11 | Wtd. Average       | 0.93988  |   0.981128  |   0.95761  |
+
 ## Evaluation Result
 
 ### Application Classification

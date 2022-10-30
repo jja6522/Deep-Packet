@@ -5,6 +5,7 @@ import datasets
 import numpy as np
 import torch
 import pandas as pd
+import time
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
 
@@ -24,13 +25,17 @@ def confusion_matrix(data_path, model, num_class):
     except:
         num_workers = 1
     dataloader = DataLoader(dataset, batch_size=4096, num_workers=num_workers, collate_fn=dataset_collate_function)
-    for batch in dataloader:
+
+    start = time.time()
+    for batch_id, batch in enumerate(dataloader):
         x = batch['feature'].float().to(model.device)
         y = batch['label'].long()
         y_hat = torch.argmax(F.log_softmax(model(x), dim=1), dim=1)
 
         for i in range(len(y)):
             cm[y[i], y_hat[i]] += 1
+
+        print("Tested batch:", batch_id, "\tElapsed:", time.strftime("%H:%M:%S", time.gmtime(time.time() - start)))
 
     return cm
 
@@ -54,6 +59,8 @@ def get_classification_report(cm, labels=None):
     for i in range(cm.shape[0]):
         precision = get_precision(cm, i)
         recall = get_recall(cm, i)
+        f1_score = 2 * ((precision * recall) / (precision + recall))
+
         if labels:
             label = labels[i]
         else:
@@ -61,9 +68,21 @@ def get_classification_report(cm, labels=None):
 
         row = {
             'label': label,
+            'recall': recall,
             'precision': precision,
-            'recall': recall
+            'f1-score': f1_score
         }
         rows.append(row)
 
-    return pd.DataFrame(rows)
+    df_metrics = pd.DataFrame(rows)
+
+    # Compute the weighted rc, pr, f1
+    support_prop = cm.sum(axis=1, keepdims=True) / cm.sum()
+    weighted_rc = df_metrics['recall'] @ support_prop
+    weighted_pr = df_metrics['precision'] @ support_prop
+    weighted_f1 = df_metrics['f1-score'] @ support_prop
+
+    df_metrics.loc[len(df_metrics)] = ['Wtd. Average', weighted_rc.item(), weighted_pr.item(), weighted_f1.item()]
+
+    return df_metrics
+
