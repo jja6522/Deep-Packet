@@ -108,7 +108,7 @@ Results using the pre-processed dataset at [here](https://drive.google.com/file/
 | 14 | Youtube      | 0.976249 |   0.934379  |  0.954855  |
 | 15 | Wtd. Average | 0.901613 |   0.967639  |  0.930125  |
 
-![](app_cnn_confusion_matrix.pdf)
+![Application Classification](../../app_cnn_confusion_matrix.pdf)
 
 ### Traffic Classification
 
@@ -129,7 +129,7 @@ Results using the pre-processed dataset at [here](https://drive.google.com/file/
 | 10 | VPN: Voip          | 0.982553 |   0.983955  |   0.983254 |
 | 11 | Wtd. Average       | 0.93988  |   0.981128  |   0.95761  |
 
-![](traffic_cnn_confusion_matrix.pdf)
+![Traffic Classification](../../traffic_cnn_confusion_matrix.pdf)
 
 ## Model Files
 
