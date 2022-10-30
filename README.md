@@ -77,6 +77,16 @@ Application Classification
 python test_cnn.py -d train_test_data/application_classification/test.parquet -m model/application_classification.cnn.model -t app
 ```
 
+Traffic Classification
+
+```bash
+python test_cnn.py -d train_test_data/traffic_classification/test.parquet -m model/traffic_classification.cnn.model -t traffic
+```
+
+## Evaluation Result
+
+### Application Classification
+
 Results using the pre-processed dataset at [here](https://drive.google.com/file/d/1EF2MYyxMOWppCUXlte8lopkytMyiuQu_/view?usp=sharing)
 
 |    | label        |   recall |   precision |   f1-score |
@@ -98,11 +108,9 @@ Results using the pre-processed dataset at [here](https://drive.google.com/file/
 | 14 | Youtube      | 0.976249 |   0.934379  |  0.954855  |
 | 15 | Wtd. Average | 0.901613 |   0.967639  |  0.930125  |
 
-Traffic Classification
+![](app_cnn_confusion_matrix.pdf)
 
-```bash
-python test_cnn.py -d train_test_data/traffic_classification/test.parquet -m model/traffic_classification.cnn.model -t traffic
-```
+### Traffic Classification
 
 Results using the pre-processed dataset at [here](https://drive.google.com/file/d/1EF2MYyxMOWppCUXlte8lopkytMyiuQu_/view?usp=sharing)
 
@@ -121,15 +129,7 @@ Results using the pre-processed dataset at [here](https://drive.google.com/file/
 | 10 | VPN: Voip          | 0.982553 |   0.983955  |   0.983254 |
 | 11 | Wtd. Average       | 0.93988  |   0.981128  |   0.95761  |
 
-## Evaluation Result
-
-### Application Classification
-
-![](https://blog.munhou.com/images/deep-packet/cnn_app_classification.png)
-
-### Traffic Classification
-
-![](https://blog.munhou.com/images/deep-packet/cnn_traffic_classification.png)
+![](traffic_cnn_confusion_matrix.pdf)
 
 ## Model Files
 
