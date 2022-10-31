@@ -50,7 +50,7 @@ def main(data_path, model_path, task):
         # Calculate precision, recall
         df_metrics = get_classification_report(app_cnn_cm, app_labels)
 
-        print(df_metrics.to_markdown())
+        print(df_metrics.round(2).to_markdown())
 
     elif task == 'traffic':
 
@@ -73,7 +73,7 @@ def main(data_path, model_path, task):
         # Calculate precision, recall
         df_metrics = get_classification_report(traffic_cnn_cm, traffic_labels)
 
-        print(df_metrics.to_markdown())
+        print(df_metrics.round(2).to_markdown())
 
     else:
         exit('Not Support')
