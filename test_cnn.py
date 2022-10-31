@@ -10,7 +10,7 @@ from utils import ID_TO_APP, ID_TO_TRAFFIC
 
 def plot_confusion_matrix(cm, labels, file_name=None):
     normalised_cm = normalise_cm(cm)
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(12, 12))
     sns.heatmap(
         data=normalised_cm, cmap='YlGnBu',
         xticklabels=labels, yticklabels=labels,
@@ -50,7 +50,7 @@ def main(data_path, model_path, task):
         # Calculate precision, recall
         df_metrics = get_classification_report(app_cnn_cm, app_labels)
 
-        print(df_metrics.round(2).to_markdown())
+        print(df_metrics.round(2).to_markdown(index=False))
 
     elif task == 'traffic':
 
@@ -73,7 +73,7 @@ def main(data_path, model_path, task):
         # Calculate precision, recall
         df_metrics = get_classification_report(traffic_cnn_cm, traffic_labels)
 
-        print(df_metrics.round(2).to_markdown())
+        print(df_metrics.round(2).to_markdown(index=False))
 
     else:
         exit('Not Support')
