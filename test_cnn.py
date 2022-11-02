@@ -45,7 +45,7 @@ def main(data_path, model_path, task):
             app_labels.append(ID_TO_APP[i])
 
         # plot results to a file
-        plot_confusion_matrix(app_cnn_cm, app_labels, 'app_cnn_confusion_matrix.pdf')
+        plot_confusion_matrix(app_cnn_cm, app_labels, 'metrics/app_cnn_confusion_matrix.pdf')
 
         # Calculate precision, recall
         df_metrics = get_classification_report(app_cnn_cm, app_labels)
@@ -68,7 +68,7 @@ def main(data_path, model_path, task):
             traffic_labels.append(ID_TO_TRAFFIC[i])
 
         # plot results to a file
-        plot_confusion_matrix(traffic_cnn_cm, traffic_labels, 'traffic_cnn_confusion_matrix.pdf')
+        plot_confusion_matrix(traffic_cnn_cm, traffic_labels, 'metrics/traffic_cnn_confusion_matrix.pdf')
 
         # Calculate precision, recall
         df_metrics = get_classification_report(traffic_cnn_cm, traffic_labels)
