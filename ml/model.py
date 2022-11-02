@@ -112,6 +112,9 @@ class CNN(LightningModule):
             num_workers = multiprocessing.cpu_count()
         except:
             num_workers = 1
+
+        print("Train set size:", len(dataset))
+
         dataloader = DataLoader(dataset, batch_size=16, num_workers=num_workers, collate_fn=dataset_collate_function,
                                 shuffle=True)
 

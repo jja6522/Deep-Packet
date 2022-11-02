@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import numpy as np
+import time
 import torch
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping
@@ -33,10 +34,14 @@ def train_cnn(c1_kernel_size, c1_output_dim, c1_stride, c2_kernel_size, c2_outpu
     ).float()
     trainer = Trainer(val_check_interval=1.0, max_epochs=epoch, devices='auto', accelerator='auto', logger=logger,
                       callbacks=[EarlyStopping(monitor='training_loss', mode='min', check_on_train_epoch_end=True)])
+
+    start = time.time()
     trainer.fit(model)
 
     # save model
     trainer.save_checkpoint(str(model_path.absolute()))
+
+    print("Total training time:", time.strftime("%H:%M:%S", time.gmtime(time.time() - start)))
 
 
 def train_application_classification_cnn_model(data_path, model_path):

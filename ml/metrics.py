@@ -24,6 +24,9 @@ def confusion_matrix(data_path, model, num_class):
         num_workers = multiprocessing.cpu_count()
     except:
         num_workers = 1
+
+    print("Test set size:", len(dataset))
+
     dataloader = DataLoader(dataset, batch_size=4096, num_workers=num_workers, collate_fn=dataset_collate_function)
 
     start = time.time()
@@ -35,7 +38,7 @@ def confusion_matrix(data_path, model, num_class):
         for i in range(len(y)):
             cm[y[i], y_hat[i]] += 1
 
-        print("Tested batch:", batch_id, "\tElapsed:", time.strftime("%H:%M:%S", time.gmtime(time.time() - start)))
+    print("Total test time:", time.strftime("%H:%M:%S", time.gmtime(time.time() - start)))
 
     return cm
 
