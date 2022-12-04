@@ -1,23 +1,6 @@
 # Deep Packet
 
-Details in blog
-post: https://blog.munhou.com/2020/04/05/Pytorch-Implementation-of-Deep-Packet-A-Novel-Approach-For-Encrypted-Tra%EF%AC%83c-Classi%EF%AC%81cation-Using-Deep-Learning/
-
-## EDIT: 2022-09-27
-
-* Update dataset and model
-* Update dependencies
-* Add more data to `chat`, `file_transfer`, `voip`, `streaming` and `vpn_voip`
-* Remove tor and torrent related data as they are no longer available
-
-## EDIT: 2022-01-18
-
-* Update dataset and model
-
-## EDIT: 2022-01-17
-
-* Update code and model
-* Drop `petastorm`, use huggingface's `datasets` instead for data loader
+This a fork from the implementation at https://github.com/munhouiani/Deep-Packet
 
 ## How to Use
 
@@ -31,17 +14,9 @@ post: https://blog.munhou.com/2020/04/05/Pytorch-Implementation-of-Deep-Packet-A
       ```bash
       conda env create -f env_linux_cpu.yaml
       ```
-    * For Linux (CUDA 10.2)
+    * For Linux (CUDA 10.x)
       ```bash
-      conda env create -f env_linux_cuda102.yaml
-      ```
-    * For Linux (CUDA 11.3)
-      ```bash
-      conda env create -f env_linux_cuda113.yaml
-      ```
-    * For Linux (CUDA 11.6)
-      ```bash
-      conda env create -f env_linux_cuda116.yaml
+      conda env create -f env_linux_cuda10x.yaml
       ```
 * Download the full dataset from [full dataset](https://www.unb.ca/cic/datasets/vpn.html) and store it into a folder called ISCXVPN2016
 
@@ -51,10 +26,63 @@ post: https://blog.munhou.com/2020/04/05/Pytorch-Implementation-of-Deep-Packet-A
 python preprocessing.py -s /path/to/ISCXVPN2016/raw_captures -t /path/to/ISCXVPN2016/processed_captures
 ```
 
-## Create Train and Test
+## Initial class distributions for the full dataset
+
+Application Classification
+                                                       
+|app_label|  count|
+|:--------|------:|
+|     null|4014835|
+|        0|   3923|
+|        1|  68594|
+|        2|2697532|
+|        3|4081421|
+|        4|   9781|
+|        5|3920675|
+|        6|   3435|
+|        7| 160789|
+|        8| 421883|
+|        9| 682965|
+|       10|3809321|
+|       11|  22926|
+|       12|  92998|
+|       13| 843408|
+|       14| 140514|
+
+Traffic Classification
+                                                     
+|traffic_label|  count|
+|:------------|------:|
+|            0| 129568|
+|            1|  68594|
+|            2|6602555|
+|            3| 417227|
+|            4|9742221|
+|            5|  54928|
+|            6| 252890|
+|            7|  15991|
+|            8|1053724|
+|            9| 269115|
+|           10|2368187|
+
+## Create Train/Test split using random under-sampling
 
 ```bash
 python create_train_test_set.py -s /path/to/ISCXVPN2016/processed_captures -t /path/to/ISCXVPN2016/train_test_data
+```
+
+## Create Train/Test split using SMOTE
+
+For reading a [small sample](https://drive.google.com/file/d/1bUBt4ILBjasQfZ17PCvEMQ7O0tHi9O5J/view?usp=share_link) (~1 min): 
+
+```bash
+python SMOTE.py /path/to/ISCXVPN2016/processed_small/*.transformed_part_0000.json.gz
+```
+
+For reading the full dataset (~15 min):
+
+```bash
+python SMOTE.py /path/to/ISCXVPN2016/processed_captures/*.transformed_part_*.json.gz
 ```
 
 ## Train Model
@@ -85,7 +113,8 @@ Traffic Classification
 python test_cnn.py -d /path/to/ISCXVPN2016/train_test_data/traffic_classification/test.parquet -m model/traffic_classification.cnn.model -t traffic
 ```
 
-## Evaluation Result
+
+## Results evaluation
 
 ### Application Classification Metrics
 
