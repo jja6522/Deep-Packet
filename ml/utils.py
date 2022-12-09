@@ -32,7 +32,7 @@ def train_cnn(c1_kernel_size, c1_output_dim, c1_stride, c2_kernel_size, c2_outpu
         data_path=data_path,
         signal_length=signal_length,
     ).float()
-    trainer = Trainer(val_check_interval=1.0, max_epochs=epoch, devices='auto', accelerator='auto', logger=logger,
+    trainer = Trainer(deterministic=True, val_check_interval=1.0, max_epochs=epoch, devices='auto', accelerator='auto', logger=logger,
                       callbacks=[EarlyStopping(monitor='training_loss', mode='min', check_on_train_epoch_end=True)])
 
     start = time.time()

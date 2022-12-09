@@ -79,7 +79,7 @@ For reading a [small sample](https://drive.google.com/file/d/1bUBt4ILBjasQfZ17PC
 python SMOTE.py /path/to/ISCXVPN2016/processed_small/*.transformed_part_0000.json.gz
 ```
 
-For reading the full dataset (~15 min):
+For reading the full dataset (~30 min):
 
 ```bash
 python SMOTE.py /path/to/ISCXVPN2016/processed_captures/*.transformed_part_*.json.gz
@@ -120,22 +120,22 @@ python test_cnn.py -d /path/to/ISCXVPN2016/train_test_data/traffic_classificatio
 
 | label        |   recall |   precision |   f1-score |
 |:-------------|---------:|------------:|-----------:|
-| AIM Chat     |     0.87 |        0.04 |       0.08 |
-| Email        |     0.94 |        0.07 |       0.13 |
-| Facebook     |     0.85 |        0.91 |       0.88 |
+| AIM Chat     |     0.9  |        0.06 |       0.12 |
+| Email        |     0.81 |        0.08 |       0.15 |
+| Facebook     |     0.84 |        0.91 |       0.87 |
 | FTPS         |     0.99 |        1    |       1    |
-| Gmail        |     0.89 |        0.15 |       0.26 |
-| Hangouts     |     0.88 |        0.99 |       0.94 |
-| ICQ          |     0.88 |        0.03 |       0.07 |
-| Netflix      |     0.98 |        0.96 |       0.97 |
-| SCP          |     0.92 |        0.93 |       0.92 |
-| SFTP         |     0.99 |        0.98 |       0.99 |
-| Skype        |     0.84 |        0.97 |       0.9  |
-| Spotify      |     0.96 |        0.37 |       0.53 |
-| Vimeo        |     0.98 |        0.95 |       0.96 |
-| Voipbuster   |     0.99 |        0.97 |       0.98 |
+| Gmail        |     0.93 |        0.12 |       0.21 |
+| Hangouts     |     0.88 |        0.99 |       0.93 |
+| ICQ          |     0.7  |        0.03 |       0.06 |
+| Netflix      |     0.98 |        0.97 |       0.97 |
+| SCP          |     0.93 |        0.87 |       0.9  |
+| SFTP         |     0.99 |        0.99 |       0.99 |
+| Skype        |     0.86 |        0.92 |       0.89 |
+| Spotify      |     0.97 |        0.36 |       0.52 |
+| Vimeo        |     0.98 |        0.95 |       0.97 |
+| Voipbuster   |     0.99 |        0.99 |       0.99 |
 | Youtube      |     0.98 |        0.9  |       0.94 |
-| Wtd. Average |     0.91 |        0.97 |       0.93 |
+| Wtd. Average |     0.91 |        0.96 |       0.93 |
 
 
 ![Application Classification](../../metrics/app_cnn_confusion_matrix.pdf)
@@ -144,17 +144,17 @@ python test_cnn.py -d /path/to/ISCXVPN2016/train_test_data/traffic_classificatio
 
 | label              |   recall |   precision |   f1-score |
 |:-------------------|---------:|------------:|-----------:|
-| Chat               |     0.39 |        0.35 |       0.37 |
-| Email              |     0.96 |        0.05 |       0.09 |
-| File Transfer      |     0.94 |        1    |       0.97 |
-| Streaming          |     0.96 |        0.98 |       0.97 |
-| Voip               |     0.87 |        1    |       0.93 |
-| VPN: Chat          |     0.97 |        0.22 |       0.36 |
-| VPN: File Transfer |     0.97 |        0.83 |       0.9  |
-| VPN: Email         |     0.99 |        0.52 |       0.68 |
+| Chat               |     0.69 |        0.25 |       0.37 |
+| Email              |     0.94 |        0.08 |       0.15 |
+| File Transfer      |     0.95 |        1    |       0.97 |
+| Streaming          |     0.99 |        0.96 |       0.97 |
+| Voip               |     0.91 |        0.99 |       0.95 |
+| VPN: Chat          |     0.99 |        0.51 |       0.67 |
+| VPN: File Transfer |     0.99 |        0.94 |       0.96 |
+| VPN: Email         |     1    |        0.89 |       0.94 |
 | VPN: Streaming     |     0.99 |        1    |       1    |
-| VPN: Torrent       |     0.99 |        1    |       1    |
-| VPN: Voip          |     0.96 |        0.94 |       0.95 |
-| Wtd. Average       |     0.91 |        0.98 |       0.94 |
+| VPN: Torrent       |     1    |        1    |       1    |
+| VPN: Voip          |     0.99 |        0.99 |       0.99 |
+| Wtd. Average       |     0.94 |        0.98 |       0.96 |
 
 ![Traffic Classification](../../metrics/traffic_cnn_confusion_matrix.pdf)
