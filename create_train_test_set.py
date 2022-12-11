@@ -38,7 +38,7 @@ def top_n_per_group(spark_df, groupby, topn):
     )
 
 
-def split_train_test(df, test_size, class_balancing):
+def split_train_test(df, test_size, class_balancing, N=1, k=3):
     # add increasing id for df
     df = df.withColumn('id', monotonically_increasing_id())
 
@@ -94,7 +94,7 @@ def split_train_test(df, test_size, class_balancing):
         train_df = train_df.withColumn("feature", array_to_vector("feature"))
 
         # Apply SMOTE for minority labels
-        train_df = smote(train_df, minority_label=0, N=1, k=5)
+        train_df = smote(train_df, minority_label=0, N=N, k=k)
 
         # Change the feature column back to array
         train_df = train_df.withColumn("feature", vector_to_array("feature"))
@@ -106,8 +106,8 @@ def split_train_test(df, test_size, class_balancing):
 
         # Apply SMOTE for minority labels
         #TODO: Run a grid search to find optimal values for minority classes, N, k
-        train_df = smote(train_df, minority_label=0, N=1, k=5)
-        train_df = smote(train_df, minority_label=6, N=1, k=5)
+        train_df = smote(train_df, minority_label=0, N=N, k=k)
+        train_df = smote(train_df, minority_label=6, N=N, k=k)
 
         # Change the feature column back to array
         train_df = train_df.withColumn("feature", vector_to_array("feature"))
@@ -141,12 +141,12 @@ def save_parquet(df, path):
     )
 
 
-def create_train_test_for_task(df, label_col, test_size, class_balancing, skip_test, train_data_dir, test_data_dir):
+def create_train_test_for_task(df, label_col, test_size, class_balancing, N, k, skip_test, train_data_dir, test_data_dir):
 
     task_df = df.filter(col(label_col).isNotNull()).selectExpr('feature', f'{label_col} as label')
 
     print('splitting train test')
-    train_df, test_df = split_train_test(task_df, test_size, class_balancing)
+    train_df, test_df = split_train_test(task_df, test_size, class_balancing, N, k)
     print('splitting train test done')
 
     train_path = train_data_dir / 'train.parquet'
@@ -253,14 +253,18 @@ def smote(vectorized_sdf, minority_label, N, k, seed=9876, bucketLength=1.0):
 @click.option('--test_size', default=0.2, help='size of test size', type=float)
 @click.option('--class_balancing', help='Class balancing technique for the training data')
 @click.option('--skip_test', default=False, help='Whether to skip generating the test data again')
+@click.option('-n', default=1, help='number of minority classes SMOTE should synthesize values for')
+@click.option('-k', default=3, help='number of neighbots SMOTE should consider')
 
-def main(source, train, test, test_size, class_balancing, skip_test):
+def main(source, train, test, test_size, class_balancing, skip_test, n, k):
     print("[create_test_train_set] Starting at ", time.strftime("%c %z", time.localtime(time.time())))
     prog_start = time.time()
 
     source_data_dir = Path(source)
     train_data_dir = Path(train)
     test_data_dir = Path(test)
+
+    print ("Paths good? ", os.path.exists(source_data_dir), os.path.exists(train_data_dir), os.path.exists(test_data_dir))
 
     # prepare dir for dataset
     train_app_data_dir = train_data_dir / 'application_classification'
@@ -291,10 +295,14 @@ def main(source, train, test, test_size, class_balancing, skip_test):
     df = spark.read.schema(schema).json(f'{source_data_dir.absolute().as_uri()}/*.json.gz')
     #df = spark.read.schema(schema).json(f'{source_data_dir.absolute().as_uri()}/*.transformed_part_0000.json.gz')
 
+    df.show()
+    for i in range (0, 14):
+        print(f"Size of {i}: ", df.filter(col("app_label") == i).count())
+    input("Waiting")
     # prepare data for application classification and traffic classification
     print('processing application classification dataset')
     create_train_test_for_task(df=df, label_col='app_label',
-                               test_size=test_size, class_balancing=class_balancing, skip_test=skip_test,
+                               test_size=test_size, class_balancing=class_balancing, N=n, k=k, skip_test=skip_test,
                                train_data_dir=train_app_data_dir,test_data_dir=test_app_data_dir)
 
 #    print('processing traffic classification dataset')
@@ -304,6 +312,7 @@ def main(source, train, test, test_size, class_balancing, skip_test):
     # stats
     print_df_label_distribution(spark, train_app_data_dir / 'train.parquet')
     print_df_label_distribution(spark, test_app_data_dir / 'test.parquet')
+    df.show()
 #    print_df_label_distribution(spark, traffic_data_dir_path / 'train.parquet')
 #    print_df_label_distribution(spark, traffic_data_dir_path / 'test.parquet')
     print(f'[create_test_train_set] Done in {time.strftime("%H:%M:%S", time.gmtime(time.time() - prog_start))}')
