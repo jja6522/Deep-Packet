@@ -111,8 +111,11 @@ def split_train_test(df, test_size, class_balancing, c, N, k):
     elif class_balancing == 'SMOTE+under_sampling':
         print('Balance dataset using', class_balancing)
 
-        # get label list with count of each label
+        # get label counts for each label
         label_count_df = train_df.groupby('label').count().toPandas()
+
+        print(">>> Before SMOTE: ")
+        print(label_count_df)
 
         # get a "c" number of minority classes to apply SMOTE
         min_classes = label_count_df.sort_values(by='count').head(c)['label'].values.tolist()
@@ -127,6 +130,12 @@ def split_train_test(df, test_size, class_balancing, c, N, k):
 
         # Change the feature column back to array
         train_df = train_df.withColumn("feature", vector_to_array("feature"))
+
+        # recompute label counts after smote
+        label_count_df = train_df.groupby('label').count().toPandas()
+
+        print(">>> After SMOTE:")
+        print(label_count_df)
 
         # get min label count in train set for under sampling
         min_label_count = int(label_count_df['count'].min())

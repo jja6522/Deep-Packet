@@ -2,6 +2,16 @@
 
 This a fork from the original implementation at https://github.com/munhouiani/Deep-Packet
 
+## Below is the list of files that were modified for the experiment:
+
+* SMOTE Implementation: [create_train_test_set.py](create_train_test_set.py)
+
+* Train/Test data reporting: [data_reports.py](data_reports.py)
+
+* Test and collect metrics to evaluate model performance: [test_cnn.py](test_cnn.py)
+
+* Precision-Recall curves: [ml/metrics.py](ml/metrics.py)
+
 ## To setup the project on an ICL6 machine
 
 1. Create an environment via conda
@@ -34,7 +44,7 @@ python create_train_test_set.py --source ~/datasets/processed_small --train ~/da
 * Amount of SMOTE (n): 1, 2, 3, 4, 5
 
 ```python
-python create_train_test_set.py --source ~/datasets/processed_small --train ~/datasets/smote_c2_n1_k5_train_split --test ~/datasets/test_split --class_balancing SMOTE+under_sampling -c 2 -n 1 -k 5 -t app
+python create_train_test_set.py --source ~/datasets/processed_small --train ~/datasets/smote_c2_n2_k5_train_split --test ~/datasets/test_split --class_balancing SMOTE+under_sampling -c 2 -n 2 -k 5 -t app --skip_test 1
 ```
 
 ## Train Model
