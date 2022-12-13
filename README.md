@@ -48,7 +48,7 @@ python train_cnn.py -d ~/datasets/undersampled_train_split/application_classific
 Traffic Classification
 
 ```python
-python train_cnn.py -d /path/to/datasets/undersampled_train_split/traffic_classification/train.parquet -m model/traffic_classification.cnn.model.base -t traffic
+python train_cnn.py -d ~/datasets/undersampled_train_split/traffic_classification/train.parquet -m model/traffic_classification.cnn.model.base -t traffic
 ```
 
 ## Test Model
@@ -56,13 +56,13 @@ python train_cnn.py -d /path/to/datasets/undersampled_train_split/traffic_classi
 Application Classification
 
 ```python
-python test_cnn.py -d ~/datasets/test_split/application_classification/test.parquet -m model/application_classification.cnn.model.base -t app
+python test_cnn.py -d ~/datasets/test_split/application_classification/test.parquet -m model/application_classification.cnn.model.base -t app -p base
 ```
 
 Traffic Classification
 
 ```python
-python test_cnn.py -d /path/to/datasets/test_split/traffic_classification/test.parquet -m model/traffic_classification.cnn.model -t traffic
+python test_cnn.py -d ~/datasets/test_split/traffic_classification/test.parquet -m model/traffic_classification.cnn.model.base -t traffic -p base
 ```
 
 ## (Optional) Data reporting script to show the label distribution for any train/test split

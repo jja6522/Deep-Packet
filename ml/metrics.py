@@ -11,12 +11,19 @@ from torch.utils.data import DataLoader
 
 from ml.dataset import dataset_collate_function
 
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
+from sklearn.metrics import average_precision_score
+from sklearn.metrics import precision_recall_curve
+from sklearn.preprocessing import label_binarize
 
-def confusion_matrix(data_path, model, num_class):
+
+def classification_metrics(data_path, model, n_classes, label_names=None):
     data_path = Path(data_path)
     model.eval()
 
-    cm = np.zeros((num_class, num_class), dtype=np.float)
+    cmatrix = np.zeros((n_classes, n_classes), dtype=np.float)
 
     dataset_dict = datasets.load_dataset(str(data_path.absolute()))
     dataset = dataset_dict[list(dataset_dict.keys())[0]]
@@ -30,62 +37,63 @@ def confusion_matrix(data_path, model, num_class):
     dataloader = DataLoader(dataset, batch_size=4096, num_workers=num_workers, collate_fn=dataset_collate_function)
 
     start = time.time()
-    for batch_id, batch in enumerate(dataloader):
-        x = batch['feature'].float().to(model.device)
-        y = batch['label'].long()
-        y_hat = torch.argmax(F.log_softmax(model(x), dim=1), dim=1)
+    predicted_scores, predicted_labels, ground_truth_labels = [], [], []
+    n_correct = 0
+    n_total = 0
+    with torch.no_grad():
+        for batch_id, batch in enumerate(dataloader):
+            features = batch['feature'].float().to(model.device)
+            labels = batch['label'].long().to(model.device)
+            outputs = model(features)
 
-        for i in range(len(y)):
-            cm[y[i], y_hat[i]] += 1
+            y_hat = torch.argmax(F.log_softmax(outputs, dim=1), dim=1)
+
+            _, predicted = torch.max(outputs, 1)
+            sm = torch.nn.Softmax(dim=1)
+            scores = sm(outputs)
+
+            n_correct += (predicted == labels).sum().item()
+            n_total += labels.shape[0]
+
+            predicted_scores.append(scores.cpu().detach().numpy())
+            predicted_labels.append(predicted.cpu().detach().numpy())
+            ground_truth_labels.append(labels.cpu().detach().numpy())
+
+            for i in range(len(labels)):
+                cmatrix[labels[i], y_hat[i]] += 1
 
     print("Total test time:", time.strftime("%H:%M:%S", time.gmtime(time.time() - start)))
 
-    return cm
+    # Compute precision and recall from labels
+    y_true = np.concatenate(ground_truth_labels).ravel()
+    y_pred = np.concatenate(predicted_labels).ravel()
 
+    df_metrics = pd.DataFrame(index=[*range(n_classes)],
+                              columns=['label', 'precision', 'recall', 'f1_score'])
 
-def get_precision(cm, i):
-    tp = cm[i, i]
-    tp_fp = cm[:, i].sum()
+    # Average is none to get the score for each class
+    df_metrics['label'] = label_names
+    df_metrics['precision'] = precision_score(y_true, y_pred, average=None)
+    df_metrics['recall'] = recall_score(y_true, y_pred, average=None)
+    df_metrics['f1_score'] = f1_score(y_true, y_pred, average=None)
 
-    return tp / tp_fp
+    df_metrics.loc[len(df_metrics)] = ['Wtd. Average',
+                                       recall_score(y_true, y_pred, average='weighted'),
+                                       precision_score(y_true, y_pred, average='weighted'),
+                                       f1_score(y_true, y_pred, average='weighted')]
 
+    # Binarize the predictions and scores
+    y_bin = label_binarize(y_true , classes=[*range(n_classes)])
+    y_score = np.concatenate(predicted_scores).ravel().reshape(-1, n_classes)
 
-def get_recall(cm, i):
-    tp = cm[i, i]
-    p = cm[i, :].sum()
+    # Compute average precision (AP) from prediction scores
+    # AP: weighted mean of precisions achieved at each threshold
+    precision_prob = dict()
+    recall_prob = dict()
+    average_precision = dict()
+    for i in range(n_classes):
+        precision_prob[i], recall_prob[i], _ = precision_recall_curve(y_bin[:, i], y_score[:, i])
+        average_precision[i] = average_precision_score(y_bin[:, i], y_score[:, i])
 
-    return tp / p
-
-
-def get_classification_report(cm, labels=None):
-    rows = []
-    for i in range(cm.shape[0]):
-        precision = get_precision(cm, i)
-        recall = get_recall(cm, i)
-        f1_score = 2 * ((precision * recall) / (precision + recall))
-
-        if labels:
-            label = labels[i]
-        else:
-            label = i
-
-        row = {
-            'label': label,
-            'recall': recall,
-            'precision': precision,
-            'f1-score': f1_score
-        }
-        rows.append(row)
-
-    df_metrics = pd.DataFrame(rows)
-
-    # Compute the weighted rc, pr, f1
-    support_prop = cm.sum(axis=1, keepdims=True) / cm.sum()
-    weighted_rc = df_metrics['recall'] @ support_prop
-    weighted_pr = df_metrics['precision'] @ support_prop
-    weighted_f1 = df_metrics['f1-score'] @ support_prop
-
-    df_metrics.loc[len(df_metrics)] = ['Wtd. Average', weighted_rc.item(), weighted_pr.item(), weighted_f1.item()]
-
-    return df_metrics
+    return cmatrix, df_metrics, recall_prob, precision_prob, average_precision
 
