@@ -34,7 +34,7 @@ python create_train_test_set.py --source ~/datasets/processed_small --train ~/da
 * Amount of SMOTE (n): 1, 2, 3, 4, 5
 
 ```python
-python create_train_test_set.py --source ~/datasets/processed_small --train ~/datasets/smote_c2_n1_k5_train_split --test ~/datasets/test_split --class_balancing SMOTE+under_sampling --c 2 --n 1 --k 5
+python create_train_test_set.py --source ~/datasets/processed_small --train ~/datasets/smote_c2_n1_k5_train_split --test ~/datasets/test_split --class_balancing SMOTE+under_sampling -c 2 -n 1 -k 5 -t app
 ```
 
 ## Train Model
@@ -42,13 +42,7 @@ python create_train_test_set.py --source ~/datasets/processed_small --train ~/da
 Application Classification
 
 ```python
-python train_cnn.py -d ~/datasets/undersampled_train_split/application_classification/train.parquet -m model/application_classification.cnn.model.base -t app
-```
-
-Traffic Classification
-
-```python
-python train_cnn.py -d ~/datasets/undersampled_train_split/traffic_classification/train.parquet -m model/traffic_classification.cnn.model.base -t traffic
+python train_cnn.py -d ~/datasets/smote_c2_n1_k5_train_split/application_classification/train.parquet -m model/application_classification.cnn.model.smote.c2n1k5 -t app
 ```
 
 ## Test Model
@@ -56,13 +50,7 @@ python train_cnn.py -d ~/datasets/undersampled_train_split/traffic_classificatio
 Application Classification
 
 ```python
-python test_cnn.py -d ~/datasets/test_split/application_classification/test.parquet -m model/application_classification.cnn.model.base -t app -p base
-```
-
-Traffic Classification
-
-```python
-python test_cnn.py -d ~/datasets/test_split/traffic_classification/test.parquet -m model/traffic_classification.cnn.model.base -t traffic -p base
+python test_cnn.py -d ~/datasets/test_split/application_classification/test.parquet -m model/application_classification.cnn.model.smote.c2n1k5 -t app -p c2n1k5
 ```
 
 ## (Optional) Data reporting script to show the label distribution for any train/test split

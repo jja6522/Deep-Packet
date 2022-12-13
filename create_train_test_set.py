@@ -29,6 +29,12 @@ from pyspark.sql.functions import array, create_map, struct
 RANDOM_SEED = 9876
 
 
+def set_seed(use_seed):
+    """Set a random seed if use_seed is True (default)."""
+    if use_seed:
+        random.seed(RANDOM_SEED)
+        np.random.seed(RANDOM_SEED)
+
 def top_n_per_group(spark_df, groupby, topn):
     spark_df = spark_df.withColumn('rand', rand(seed=RANDOM_SEED))
     window = Window.partitionBy(col(groupby)).orderBy(col('rand'))
@@ -178,7 +184,7 @@ def print_df_label_distribution(spark, path):
 # SMOTE implementation
 # Code adapted from from https://medium.com/@haoyunlai/smote-implementation-in-pyspark-76ec4ffa2f1d
 ################################################################
-def smote(vectorized_sdf, minority_label, N, k, seed, bucketLength=1.0):
+def smote(vectorized_sdf, minority_label, N, k, seed, bucketLength=2.0):
     '''
     contains logic to perform smote oversampling, given a spark df with 2 classes
     inputs:
@@ -259,22 +265,22 @@ def smote(vectorized_sdf, minority_label, N, k, seed, bucketLength=1.0):
 @click.option('--test_size', default=0.2, help='size of test size', type=float)
 @click.option('--class_balancing', help='class balancing technique for the training data')
 @click.option('--skip_test', default=False, help='whether to skip generating the test split')
-@click.option('--c', default=2, help='number of minority classes to apply SMOTE')
-@click.option('--n', default=1, help='multiplying factor of SMOTE to generate synthetic samples')
-@click.option('--k', default=5, help='number of nearest neighbors to be used in SMOTE')
+@click.option('-c', '--c', default=2, help='number of minority classes to apply SMOTE')
+@click.option('-n', '--n', default=1, help='multiplying factor of SMOTE to generate synthetic samples')
+@click.option('-k', '--k', default=5, help='number of nearest neighbors to be used in SMOTE')
+@click.option('-t', '--task', help='classification task. Option: "app" or "traffic"', required=True)
 
-def main(source, train, test, test_size, class_balancing, skip_test, c, n, k):
+def main(source, train, test, test_size, class_balancing, skip_test, c, n, k, task):
     prog_start = time.time()
     print("[create_test_train_set] Starting at ", time.strftime("%c %z", time.localtime(prog_start)))
+
+    # Set the seeds globally for reproducibility
+    set_seed(True)
 
     # prepare the directories for the train/test splits
     source_data_dir = Path(source)
     train_data_dir = Path(train)
     test_data_dir = Path(test)
-    train_app_data_dir = train_data_dir / 'application_classification'
-    test_app_data_dir = test_data_dir / 'application_classification'
-    train_traffic_data_dir = train_data_dir / 'traffic_classification'
-    test_traffic_data_dir = test_data_dir / 'traffic_classification'
 
     # initialise local spark
     os.environ['PYSPARK_PYTHON'] = sys.executable
@@ -300,23 +306,30 @@ def main(source, train, test, test_size, class_balancing, skip_test, c, n, k):
     df = spark.read.schema(schema).json(f'{source_data_dir.absolute().as_uri()}/*.json.gz')
 
     # prepare data for application classification and traffic classification
-    print('processing application classification dataset')
-    create_train_test_for_task(df=df, label_col='app_label',
-                               test_size=test_size, class_balancing=class_balancing, c=c, N=n, k=k, skip_test=skip_test,
-                               train_data_dir=train_app_data_dir, test_data_dir=test_app_data_dir)
+    if task == 'app':
+        print('processing application classification dataset')
+        train_app_data_dir = train_data_dir / 'application_classification'
+        test_app_data_dir = test_data_dir / 'application_classification'
 
-    print('processing traffic classification dataset')
-    create_train_test_for_task(df=df, label_col='traffic_label', 
-                               test_size=test_size, class_balancing=class_balancing, c=c, N=n, k=k, skip_test=skip_test,
-                               train_data_dir=train_traffic_data_dir, test_data_dir=test_traffic_data_dir)
+        create_train_test_for_task(df=df, label_col='app_label',
+                                   test_size=test_size, class_balancing=class_balancing, c=c, N=n, k=k, skip_test=skip_test,
+                                   train_data_dir=train_app_data_dir, test_data_dir=test_app_data_dir)
 
-    # print stats for application samples
-    print_df_label_distribution(spark, train_app_data_dir / 'train.parquet')
-    print_df_label_distribution(spark, test_app_data_dir / 'test.parquet')
+        # print stats for application samples
+        print_df_label_distribution(spark, train_app_data_dir / 'train.parquet')
+        print_df_label_distribution(spark, test_app_data_dir / 'test.parquet')
 
-    # print stats for traffic samples
-    print_df_label_distribution(spark, train_traffic_data_dir / 'train.parquet')
-    print_df_label_distribution(spark, test_traffic_data_dir / 'test.parquet')
+    if task == 'traffic':
+        print('processing traffic classification dataset')
+        train_traffic_data_dir = train_data_dir / 'traffic_classification'
+        test_traffic_data_dir = test_data_dir / 'traffic_classification'
+        create_train_test_for_task(df=df, label_col='traffic_label', 
+                                   test_size=test_size, class_balancing=class_balancing, c=c, N=n, k=k, skip_test=skip_test,
+                                   train_data_dir=train_traffic_data_dir, test_data_dir=test_traffic_data_dir)
+
+        # print stats for traffic samples
+        print_df_label_distribution(spark, train_traffic_data_dir / 'train.parquet')
+        print_df_label_distribution(spark, test_traffic_data_dir / 'test.parquet')
 
     print("[create_test_train_set] Done in", time.strftime("%H:%M:%S", time.gmtime(time.time() - prog_start)))
 
