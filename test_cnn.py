@@ -18,7 +18,9 @@ def plot_precision_recall_curve(recall_thresholds, precision_thresholds, class_p
 
     colors = cycle(mcolors.TABLEAU_COLORS)
 
-    _, ax = plt.subplots(figsize=(8, 8))
+    sns.set(rc={'figure.figsize': (8, 8)})
+    sns.set_context('notebook', font_scale=1.15)
+    fig, ax = plt.subplots()
 
     f_scores = np.linspace(0.2, 0.8, num=4)
     lines, labels = [], []
