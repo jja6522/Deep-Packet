@@ -109,14 +109,14 @@ def split_train_test(df, test_size, class_balancing, c, N, k):
         label_count_df = train_df.groupby('label').count().toPandas()
 
         # get a "c" number of minority classes to apply SMOTE
-        min_classes = label_count_df.sort_values(by='count').head(c)['label'].values
+        min_classes = label_count_df.sort_values(by='count').head(c)['label'].values.tolist()
 
         # Change the column feature to VectorUDT for spark ml
         train_df = train_df.withColumn("feature", array_to_vector("feature"))
 
         # Apply SMOTE for minority labels
         for label in min_classes:
-            print("Applying SMOTE: min_label", label , ', N=', N, ', k=', k)
+            print("Applying SMOTE: min_label =", label , ', N =', N, ', k =', k)
             train_df = smote(train_df, minority_label=label, N=N, k=k, seed=RANDOM_SEED)
 
         # Change the feature column back to array

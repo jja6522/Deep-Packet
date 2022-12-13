@@ -6,23 +6,35 @@ This a fork from the original implementation at https://github.com/munhouiani/De
 
 1. Create an environment via conda
 
-    * For Linux (CUDA 10.6)
-      ```bash
-      conda env create -f env_linux_cuda116.yaml
-      ```
+* For Linux (CUDA 10.6)
+
+    ```bash
+    conda env create -f env_linux_cuda116.yaml
+    ```
 
 2. Download the pre-processed dataset from [small dataset](https://drive.google.com/file/d/1bUBt4ILBjasQfZ17PCvEMQ7O0tHi9O5J/view?usp=share_link)
 
 3. Create a directory called `processed_small` and extract the contents of the downloaded dataset
-      ```bash
-      mkdir processed_small
-      tar -xvzf processed_small.tar.gz -C processed_small
-      ```
 
-## Create Train/Test split using random under-sampling (baseline)
+    ```bash
+    mkdir processed_small
+    tar -xvzf processed_small.tar.gz -C processed_small
+    ```
+
+## Create Train/Test split using Random Under-Sampling (baseline)
 
 ```python
-python create_train_test_set.py --source /path/to/datasets/processed_small --train /path/to/datasets/undersampled_train_split --test /path/to/datasets/test_split --class_balancing under_sampling
+python create_train_test_set.py --source ~/datasets/processed_small --train ~/datasets/undersampled_train_split --test ~/datasets/test_split --class_balancing under_sampling
+```
+
+## Create Train/Test split using SMOTE and Random Under-Sampling (experiment)
+
+* Minority classes (c): 2
+* Nearest Neighbors (k): 5
+* Amount of SMOTE (n): 1, 2, 3, 4, 5
+
+```python
+python create_train_test_set.py --source ~/datasets/processed_small --train ~/datasets/smote_c2_n1_k5_train_split --test ~/datasets/test_split --class_balancing SMOTE+under_sampling --c 2 --n 1 --k 5
 ```
 
 ## Train Model
@@ -36,7 +48,7 @@ python train_cnn.py -d ~/datasets/undersampled_train_split/application_classific
 Traffic Classification
 
 ```python
-python train_cnn.py -d /path/to/datasets/undersampled_train_split/traffic_classification/train.parquet -m model/traffic_classification.cnn.model -t traffic
+python train_cnn.py -d /path/to/datasets/undersampled_train_split/traffic_classification/train.parquet -m model/traffic_classification.cnn.model.base -t traffic
 ```
 
 ## Test Model
